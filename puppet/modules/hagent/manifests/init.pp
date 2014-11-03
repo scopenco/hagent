@@ -65,7 +65,9 @@ class hagent (
             source => "puppet:///modules/hagent/hagent.conf",
             notify => Service["hagent"];
 
-        "/usr/local/hagent/etc/logrotate.conf":
+        "/etc/logrotate.d/hagent":
+            owner => "root",
+            group => "root",
             source => "puppet:///modules/hagent/hagent.logrotate";
 
         "/etc/sysconfig/hagent":
