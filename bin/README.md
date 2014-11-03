@@ -1,3 +1,3 @@
 directory for:
-    - CLI
-    - checking scripts
+- CLI
+- checking scripts

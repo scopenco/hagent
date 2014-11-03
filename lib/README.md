@@ -1,3 +1,3 @@
 directory for:
-    - external plugins
-    - additional modules
+- external plugins
+- additional modules
