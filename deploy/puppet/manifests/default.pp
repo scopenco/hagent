@@ -10,4 +10,5 @@ node default {
     }
 
     class { "hagent": uid => "991", gid => "991" }
+    class { "lighttpd": owner => "hagent", group => "hagent" }
 }

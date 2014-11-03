@@ -1,4 +1,7 @@
 # vim: ft=puppet
+# $Author: ascopenco $
+# Maintainer: ascopenco@mchost.ru
+# Description: hagent module
 
 class hagent::params {
     $uid = "997"
@@ -75,6 +78,8 @@ class hagent (
             source => "puppet:///modules/hagent/hagent.initd",
             require => File["/usr/local/hagent/var"],
             notify => Service["hagent"];
+
+        ["/usr/local/hagent/var/hagent.log", ]:
     }
 
     service {
