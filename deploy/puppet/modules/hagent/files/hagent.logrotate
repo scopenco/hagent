@@ -1,0 +1,7 @@
+/usr/local/hagent/var/hagent.log {
+        missingok
+        daily
+        rotate 45
+        compress
+        nocreate
+}

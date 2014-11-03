@@ -1,3 +1,0 @@
-directory for:
-    - logs
-    - locks
