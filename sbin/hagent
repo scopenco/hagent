@@ -1,0 +1,115 @@
+#!/usr/bin/python -tt
+# -*- coding: UTF-8 -*-
+'''
+Daemon for RESTful API over HTTP
+Andrey Skopenko @ 2012
+'''
+
+import optparse
+import pwd
+import os.path
+import logging
+import os
+import sys
+
+# Agent libs
+sys.path.insert(0, '/usr/local/hagent/lib')
+from bottle import run, route
+from cli import read_config
+
+
+CONFIG_FILE = '/usr/local/hagent/etc/hagent.conf'
+__version__ = '$Id$'
+
+
+def main():
+
+    p = optparse.OptionParser(description='Hosting Agent',
+                     prog='agent',
+                     version=__version__,
+                     usage='%prog -h')
+    p.add_option('--bind', action='store',
+                 help='bind to address, default on all addresses', default='')
+    p.add_option('--port', action='store',
+                 help='bind on port, default is 8081', default=8081)
+    p.add_option('--socket', action='store',
+                 help='bind on socket only for flup, '
+                 'default /usr/local/hagent/var/hagent.sock',
+                 default='/usr/local/hagent/var/hagent.sock')
+    p.add_option('--flup', action='store_true',
+                 help='run flup FastSGI server', default=None)
+    p.add_option('-d', '--debug', action='store_true',
+                 help='enable debug mode',
+                 default=None)
+    options, arguments = p.parse_args()
+
+    defaults = {
+        'logfile': '/usr/local/hagent/var/hagent.log',
+        'flup': False,
+        'socket': False,
+        'debug': False,
+        'user': 'hagent',
+    }
+
+    CONFIG = {}
+    CONFIG.update(defaults)
+    # options override config
+    CONFIG.update(dict([(k, v) for k, v in vars(options).items()
+                  if v is not None]))
+    # base logging to file
+    logging.basicConfig(format='%(asctime)s [%(process)d]: %(message)s',
+                        level=logging.DEBUG, filename=CONFIG['logfile'])
+
+    # read config
+    if os.path.isfile(CONFIG_FILE):
+        CONFIG.update(read_config(CONFIG_FILE))
+
+    logging.debug('Agent %s starting...' % __version__)
+    logging.debug('PATH=%s, SUDO_USER=%s' % (os.environ.get('PATH'),
+                  os.environ.get('SUDO_USER')))
+
+    try:
+        pw_record = pwd.getpwnam(CONFIG['user'])
+    except KeyError:
+        logging.error('user %s not found')
+        exit(1)
+
+    user_uid = pw_record.pw_uid
+    user_gid = pw_record.pw_gid
+
+    # fork to first child
+    if os.fork():
+        exit()
+
+    # change uid/gid in first child
+    os.setgid(user_gid)
+    os.setuid(user_uid)
+
+    # fork to second child with user perms
+    if os.fork():
+        exit()
+
+    os.chdir('/')
+    # redirect standard file descriptors
+    dev_null_r = file('/dev/null', 'r')
+    dev_null_w = file(CONFIG['logfile'], 'a+')
+    os.dup2(dev_null_r.fileno(), sys.stdin.fileno())
+    os.dup2(dev_null_w.fileno(), sys.stdout.fileno())
+    os.dup2(dev_null_w.fileno(), sys.stderr.fileno())
+
+
+    # here need to add plugins/modules 
+    # API 1.0
+    @route('/status', method='GET')
+    def ping():
+        return {'status': 0}
+
+    if CONFIG['flup']:
+        logging.debug('daemonize on socket %s' % CONFIG['socket'])
+        run(server='flup', quiet=True, bindAddress=CONFIG['socket'])
+    else:
+        logging.debug('daemonize on %s:%s' % (CONFIG['bind'], CONFIG['port']))
+        run(host=CONFIG['bind'], port=int(CONFIG['port']), quiet=True)
+
+if __name__ == '__main__':
+    main()

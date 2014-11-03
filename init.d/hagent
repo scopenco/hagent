@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# hagent        Startup script to Hosting Agent
+#
+# chkconfig: 2345 30 70
+# description: hagent
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+OPTIONS="--flup"
+prog="hagent"
+bin="/usr/local/hagent/sbin/hagent"
+
+if [ -f /etc/sysconfig/hagent ]; then
+        . /etc/sysconfig/hagent
+fi
+
+RETVAL=0
+start() {
+    echo -n $"Starting $prog: "
+    daemon $bin $OPTIONS
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $bin
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$prog
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+# See how we were called.
+case "$1" in
+  start)
+      start
+      ;;
+  stop)
+      stop
+      ;;
+  restart|force-reload|reload)
+      restart
+      ;;
+  condrestart|try-restart)
+      [ -f /var/lock/subsys/$prog ] && restart
+      ;;
+  status)
+        status $prog
+        RETVAL=$?
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+        exit 1
+esac
+
+exit $RETVAL
