@@ -7,4 +7,4 @@ __pycache__/
 .bash_profile
 .bashrc
 var/
-etc/*.conf
+etc/
