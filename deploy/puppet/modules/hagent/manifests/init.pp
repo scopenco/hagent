@@ -30,13 +30,14 @@ class hagent (
     }
 
     File {
-        ensure => present,
+        ensure => "present",
         owner  => "hagent",
         group  => "hagent",
         mode   => "0640",
         require => Package["bash"],
     }
 
+    # useful skeleton
     file {
         "/usr/local/hagent/.bashrc":
             source  =>  "/etc/skel/.bashrc";
@@ -49,10 +50,36 @@ class hagent (
     }
 
     file {
+        ["/usr/local/hagent/lib", "/usr/local/hagent/sbin",
+        "/usr/local/hagent/var", "/usr/local/hagent/etc", ]:
+            ensure  => "directory",
+            mode    => "0750";
+
+        ["/usr/local/hagent/sbin/hagent", ]:
+            mode    => "0750";
+
+        "/usr/local/hagent/etc/hagent.conf":
+            source  =>  "puppet:///modules/hagent/hagent.conf",
+            notify  => Service["hagent"];
+
+        "/usr/local/hagent/etc/logrotate.conf":
+            source  =>  "puppet:///modules/hagent/hagent.logrotate";
+
+        "/etc/sysconfig/hagent":
+            source  =>  "puppet:///modules/hagent/hagent.sysconfig";
+
         "/etc/init.d/hagent":
             owner  => "root",
             group  => "root",
-            mode   => "0755",
-            source  =>  "/usr/local/hagent/init.d/hagent";
+            mode    => "0755",
+            source  =>  "puppet:///modules/hagent/hagent.initd",
+            notify => Service["hagent"];
     }
+
+    service {
+         "hagent":
+            enable    => "true",
+            ensure    => "running",                                                                                                                                                   
+            require   => File["/etc/init.d/hagent"];
+     }
 }
