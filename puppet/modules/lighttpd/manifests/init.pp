@@ -1,6 +1,6 @@
 # vim: ft=puppet
 # $Author: ascopenco $
-# Maintainer: ascopenco@mchost.ru
+# Maintainer: Andrey Scopenco <andrey@scopenco.net>
 # Description: lighttpd module
 
 class lighttpd::params {
