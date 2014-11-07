@@ -5,6 +5,16 @@ This module with base func for HAgent
 Author: Andrey Scopenco andrey@scopenco.net
 '''
 
+from errno import EACCES,EAGAIN
+from fcntl import flock,LOCK_EX,LOCK_NB
+from sys import exit,stderr
+import os
+import logging
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 def read_config(config_path):
     '''

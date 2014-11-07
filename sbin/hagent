@@ -120,7 +120,6 @@ def main():
     def rest_api_v1():
         ''' RESTful API ver 1.0 for HAgent '''
         logging.debug('query url: %s' % request.url)
-        logging.debug('query params: %s' % request.params.items())
 
         # check critical config options
         if not CONFIG.get('db_file'):
@@ -142,7 +141,7 @@ def main():
         except (ImportError, SyntaxError), e:
             logging.debug(e)
             raise HTTPResponse200(json.dumps(
-                {'status': 'err', 'status_msg': 'internal error'}))
+                {'status': 'err', 'status_msg': 'error importing module'}))
 
         methodlist = tuple(method for method in mod.__all__)
 
