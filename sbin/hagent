@@ -58,10 +58,12 @@ def main():
 
     defaults = {
         'logfile': '/usr/local/hagent/var/hagent.log',
+        'db_file': '/usr/local/hagent/etc/hagent.data',
         'flup': False,
         'socket': False,
         'debug': False,
         'user': 'hagent',
+        'plugins_path': 'modules',
     }
 
     CONFIG = {}
@@ -120,23 +122,29 @@ def main():
         logging.debug('query url: %s' % request.url)
         logging.debug('query params: %s' % request.params.items())
 
+        # check critical config options
+        if not CONFIG.get('db_file'):
+            raise HTTPResponse200(json.dumps(
+                {'status': 'err',
+                 'status_msg': 'option <db_file> not found'}))
+
         # check module, func exist
         module = request.params.get('module')
         func = request.params.get('func')
         if not module or not func:
             raise HTTPResponse200(json.dumps(
-                {'status': 'error', 'status_msg': 'uri has wrong format'}))
+                {'status': 'err', 'status_msg': 'uri has wrong format'}))
 
         # add module
         try:
-            mod = __import__(module)
+            mod = __import__('%s.%s' % (CONFIG['plugins_path'], module),
+                             globals(), locals(), [module, ], -1)
         except (ImportError, SyntaxError), e:
             logging.debug(e)
             raise HTTPResponse200(json.dumps(
-                {'status': 'error', 'status_msg': 'internal error'}))
+                {'status': 'err', 'status_msg': 'internal error'}))
 
-        methodlist = tuple(method for method in dir(mod)
-                           if callable(getattr(mod, method)))
+        methodlist = tuple(method for method in mod.__all__)
 
         # show list of funcs in module
         if func == 'funclist':
@@ -146,11 +154,11 @@ def main():
 
         if func not in methodlist:
             raise HTTPResponse200(json.dumps(
-                {'status': 'error', 'status_msg':
+                {'status': 'err', 'status_msg':
                     'func <%s> not found' % func}))
 
         # run func
-        result = getattr(mod, func)(args, config)
+        result = getattr(mod, func)(request.params, CONFIG)
         if result:
             raise HTTPResponse200(json.dumps(result))
 

@@ -66,9 +66,11 @@ class FileLock:
             # Could use os.O_EXLOCK, but that doesn't exist yet in my Python
             #
             logging.debug('try lock %s' % self.lockfile)
-            self.lockfd = os.open(self.lockfile, os.O_TRUNC | os.O_CREAT | os.O_RDWR)
+            self.lockfd = os.open(self.lockfile,
+                                  os.O_TRUNC | os.O_CREAT | os.O_RDWR)
 
-            # Acquire exclusive lock on the file, but don't block waiting for it
+            # Acquire exclusive lock on the file, but don't
+            # block waiting for it
             flock(self.lockfd, LOCK_EX | LOCK_NB)
 
             # Writing to file is pointless, nobody can see it
@@ -77,7 +79,8 @@ class FileLock:
             return True
 
         except (OSError, IOError), e:
-            # Lock cannot be acquired is okay, everything else reraise exception
+            # Lock cannot be acquired is okay,
+            # everything else reraise exception
             if e.errno in (EACCES, EAGAIN):
                 return False
             else:
@@ -95,34 +98,6 @@ class FileLock:
             # Ignore error destroying lock file.  See class doc about how
             # lockfile can be erased and everything still works normally.
             pass
-
-
-def convert_dict_items_to_str(output):
-    ''' get values and check for config '''
-
-    for key in output.keys():
-        if type(output[key]) != str and type(output[key]) != list and type(output[key]) != int and type(output[key]) != dict:
-            output[key] = str(output[key])
-
-    if output['status'] == 0:
-        output['status'] = 'ok'
-    if output['status'] == 1:
-        output['status'] = 'error'
-
-    return output
-
-
-def convert_output(output, conv):
-    '''Convert output to json txt and others'''
-
-    output = convert_dict_items_to_str(output)
-    if conv == 'sjson':
-        return simplejson.dumps(output)
-    elif conv == 'cron':
-        if output.get('status') != 'ok':
-            return output
-    else:
-        return output
 
 
 if __name__ == "__main__":
