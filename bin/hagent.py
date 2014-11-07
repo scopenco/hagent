@@ -11,12 +11,20 @@ from time import strftime, gmtime
 from sys import stdout, exit
 import logging
 
-
 # A good practice
 try:
     import simplejson as json
 except ImportError:
     import json
+
+try:
+    # compat with pygments ver. 1.5
+    from pygments import highlight
+    from pygments.lexers.web import JSONLexer
+    from pygments.formatters import TerminalFormatter
+    PYGMENTS_AVAILABLE = True
+except ImportError:
+    PYGMENTS_AVAILABLE = False
 
 
 CONFIG = None
@@ -87,8 +95,16 @@ def main():
     # get data from HAgent
     r = HAgent(CONFIG['url'])
     response, content = r.rest_connect(args)
+
+    # print header
     logging.info('header:')
-    logging.info(json.dumps(response, sort_keys=True, indent=4))
+    output = json.dumps(response, sort_keys=True, indent=4)
+    if PYGMENTS_AVAILABLE:
+        print highlight(output, JSONLexer(), TerminalFormatter())
+    else:
+        logging.info(output)
+
+    # print data
     logging.info('data:')
     try:
        content_ =  json.loads(content)
@@ -98,7 +114,12 @@ def main():
         else:
             logging.info('no data')
         exit(1)
-    logging.info(json.dumps(content_, sort_keys=True, indent=4))
+
+    output = json.dumps(content_, sort_keys=True, indent=4)
+    if PYGMENTS_AVAILABLE:
+        print highlight(output, JSONLexer(), TerminalFormatter())
+    else:
+        logging.debug(output)
 
 
 if __name__ == "__main__":
