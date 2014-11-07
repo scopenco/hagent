@@ -14,20 +14,33 @@ import sys
 
 # Agent libs
 sys.path.insert(0, '/usr/local/hagent/lib')
-from bottle import run, route
+from bottle import run, get, request, HTTPResponse
 from cli import read_config
 
+# A good practice
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 CONFIG_FILE = '/usr/local/hagent/etc/hagent.conf'
 __version__ = '$Id$'
 
 
+class HTTPResponse200(HTTPResponse):
+    def __init__(self, body='', status=200, headers=None, **more_headers):
+        super(HTTPResponse, self).__init__(body,
+                                           status,
+                                           headers,
+                                           **more_headers)
+
+
 def main():
 
     p = optparse.OptionParser(description='Hosting Agent',
-                     prog='agent',
-                     version=__version__,
-                     usage='%prog -h')
+                              prog='agent',
+                              version=__version__,
+                              usage='%prog -h')
     p.add_option('--bind', action='store',
                  help='bind to address, default on all addresses', default='')
     p.add_option('--port', action='store',
@@ -57,8 +70,9 @@ def main():
     CONFIG.update(dict([(k, v) for k, v in vars(options).items()
                   if v is not None]))
     # base logging to file
+    log_file = CONFIG['logfile']
     logging.basicConfig(format='%(asctime)s [%(process)d]: %(message)s',
-                        level=logging.DEBUG, filename=CONFIG['logfile'])
+                        level=logging.DEBUG, filename=log_file)
 
     # read config
     if os.path.isfile(CONFIG_FILE):
@@ -77,6 +91,9 @@ def main():
     user_uid = pw_record.pw_uid
     user_gid = pw_record.pw_gid
 
+    # fix log file permissions for childs
+    os.chown(log_file, user_uid, user_gid)
+
     # fork to first child
     if os.fork():
         exit()
@@ -92,17 +109,50 @@ def main():
     os.chdir('/')
     # redirect standard file descriptors
     dev_null_r = file('/dev/null', 'r')
-    dev_null_w = file(CONFIG['logfile'], 'a+')
+    dev_null_w = file(log_file, 'a+')
     os.dup2(dev_null_r.fileno(), sys.stdin.fileno())
     os.dup2(dev_null_w.fileno(), sys.stdout.fileno())
     os.dup2(dev_null_w.fileno(), sys.stderr.fileno())
 
+    @get('/v1/')
+    def rest_api_v1():
+        ''' RESTful API ver 1.0 for HAgent '''
+        logging.debug('query url: %s' % request.url)
+        logging.debug('query params: %s' % request.params.items())
 
-    # here need to add plugins/modules 
-    # API 1.0
-    @route('/status', method='GET')
-    def ping():
-        return {'status': 0}
+        # check module, func exist
+        module = request.params.get('module')
+        func = request.params.get('func')
+        if not module or not func:
+            raise HTTPResponse200(json.dumps(
+                {'status': 'error', 'status_msg': 'uri has wrong format'}))
+
+        # add module
+        try:
+            mod = __import__(module)
+        except (ImportError, SyntaxError), e:
+            logging.debug(e)
+            raise HTTPResponse200(json.dumps(
+                {'status': 'error', 'status_msg': 'internal error'}))
+
+        methodlist = tuple(method for method in dir(mod)
+                           if callable(getattr(mod, method)))
+
+        # show list of funcs in module
+        if func == 'funclist':
+            raise HTTPResponse200(json.dumps(
+                dict([(method, str(getattr(mod, method).__doc__))
+                     for method in methodlist])))
+
+        if func not in methodlist:
+            raise HTTPResponse200(json.dumps(
+                {'status': 'error', 'status_msg':
+                    'func <%s> not found' % func}))
+
+        # run func
+        result = getattr(mod, func)(args, config)
+        if result:
+            raise HTTPResponse200(json.dumps(result))
 
     if CONFIG['flup']:
         logging.debug('daemonize on socket %s' % CONFIG['socket'])

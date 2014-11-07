@@ -3,5 +3,8 @@
         daily
         rotate 45
         compress
-        nocreate
+        create 0640 hagent hagent
+        postrotate
+            /sbin/service hagent restart > /dev/null 2>/dev/null || true
+        endscript
 }

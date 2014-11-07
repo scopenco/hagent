@@ -27,7 +27,7 @@ class hagent (
         gid     => $gid,
     }
 
-    package { ["bash", "python", "python-flup"]:
+    package { ["bash", "python", "python-flup", "python-httplib2"]:
             allow_virtual => false,
             ensure => installed,
     }
