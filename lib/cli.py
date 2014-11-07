@@ -100,5 +100,16 @@ class FileLock:
             pass
 
 
+def convert_status(output):
+    ''' convert status from int to str '''
+
+    if output['status'] == 0:
+        output['status'] = 'ok'
+    if output['status'] == 1:
+        output['status'] = 'err'
+
+    return output
+
+
 if __name__ == "__main__":
     print __doc__

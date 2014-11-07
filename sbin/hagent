@@ -15,7 +15,7 @@ import sys
 # Agent libs
 sys.path.insert(0, '/usr/local/hagent/lib')
 from bottle import run, get, request, HTTPResponse
-from cli import read_config
+from cli import read_config, convert_status
 
 # A good practice
 try:
@@ -160,7 +160,7 @@ def main():
         # run func
         result = getattr(mod, func)(request.params, CONFIG)
         if result:
-            raise HTTPResponse200(json.dumps(result))
+            raise HTTPResponse200(json.dumps(convert_status(result)))
 
     if CONFIG['flup']:
         logging.debug('daemonize on socket %s' % CONFIG['socket'])
