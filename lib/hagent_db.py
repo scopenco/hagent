@@ -16,7 +16,8 @@ from cli import FileLock
 def add_record(db, service_name, service_value, service_attr):
     '''Add record to db.'''
 
-    logging.debug('func add_record (%s, %s, %s)' % (service_name, service_value, service_attr))
+    logging.debug('func add_record (%s, %s, %s)' % (
+                  service_name, service_value, service_attr))
     output = {}
 
     if not access(db, R_OK):
@@ -30,7 +31,8 @@ def add_record(db, service_name, service_value, service_attr):
         args = line.strip().split()
         if args[0] == service_name and args[1] == service_value:
             output['status'] = 1
-            output['status_msg'] = '%s %s exist' % (service_name, service_value)
+            output['status_msg'] = '%s %s exist' % (
+                service_name, service_value)
             return output
 
     # wait lock file
@@ -45,7 +47,8 @@ def add_record(db, service_name, service_value, service_attr):
         with open(db, 'a') as f:
             f.write('%s %s %s\n' % (service_name,
                     service_value,
-                    ' '.join('%s=%s' % (m, service_attr[m]) for m in service_attr.keys())))
+                    ' '.join('%s=%s' % (
+                        m, service_attr[m]) for m in service_attr.keys())))
     except IOError, e:
         fl.unlock()
         output['status'] = 1
@@ -86,7 +89,8 @@ def del_record(db, service_name, service_value):
 
     if not attr_exist:
         output['status'] = 0
-        output['status_msg'] = '%s %s not found' % (service_name, service_value)
+        output['status_msg'] = '%s %s not found' % (
+            service_name, service_value)
         return output
 
     # wait lock file
@@ -112,10 +116,12 @@ def del_record(db, service_name, service_value):
     return output
 
 
-def update_record(db, service_name, service_value, service_attr, remove_attr=False):
+def update_record(db, service_name, service_value,
+                  service_attr, remove_attr=False):
     '''Change attribute in data file.'''
 
-    logging.debug('func update_record (%s, %s, %s)' % (service_name, service_value, service_attr))
+    logging.debug('func update_record (%s, %s, %s)' % (
+        service_name, service_value, service_attr))
     output = {}
 
     if not access(db, R_OK):
@@ -148,9 +154,10 @@ def update_record(db, service_name, service_value, service_attr, remove_attr=Fal
                 # update cur_attrs
                 cur_attrs.update(service_attr)
                 # append to content_modified
-                content_modified.append('%s %s %s\n' % (service_name,
-                                        service_value,
-                                        ' '.join('%s=%s' % (m, cur_attrs[m]) for m in cur_attrs.keys())))
+                content_modified.append('%s %s %s\n' % (
+                    service_name, service_value,
+                    ' '.join('%s=%s' % (
+                        m, cur_attrs[m]) for m in cur_attrs.keys())))
 
     # wait lock file
     fl = FileLock('%s.lock' % db)
@@ -178,7 +185,8 @@ def update_record(db, service_name, service_value, service_attr, remove_attr=Fal
 def get_record_attr(db, service_name, service_value):
     '''Get service attr to data file.'''
 
-    logging.debug('func get_record_attr (%s, %s)' % (service_name, service_value))
+    logging.debug('func get_record_attr (%s, %s)' % (
+        service_name, service_value))
     output = {}
 
     if not access(db, R_OK):
@@ -274,7 +282,8 @@ def get_account_resources(db, account, locked=0):
                         resources['MailDomain'].append(args[1])
 
     if locked:
-        logging.debug('resources for account %s with locked = %s' % (account, resources))
+        logging.debug('resources for account %s with locked = %s' % (
+            account, resources))
     else:
         logging.debug('resources for account %s = %s' % (account, resources))
     output['status'] = 0
@@ -334,7 +343,8 @@ def get_domain_resources(db, domain, locked=0):
                 resources['Cron'].append(args[1])
 
     if locked:
-        logging.debug('resources for domain %s with locked = %s' % (domain, resources))
+        logging.debug('resources for domain %s with locked = %s' % (
+            domain, resources))
     else:
         logging.debug('resources for domain %s = %s' % (domain, resources))
     output['status'] = 0
@@ -461,9 +471,11 @@ def get_maildomain_resources(db, domain, locked=0):
                         resources['MailDomainAlias'].append(args[1])
 
     if locked:
-        logging.debug('resources for mail domain %s with locked = %s' % (domain, resources))
+        logging.debug('resources for mail domain %s with locked = %s' % (
+            domain, resources))
     else:
-        logging.debug('resources for mail domain %s = %s' % (domain, resources))
+        logging.debug('resources for mail domain %s = %s' % (
+            domain, resources))
     output['status'] = 0
     output.update(resources)
     return output
