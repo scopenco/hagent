@@ -39,44 +39,43 @@ class HAgentTest(unittest.TestCase):
     ''' Test module account '''
 
     testAccount = 'a100500'
-    resultsMap = {
-        'create': { 'status': 'ok', 'status_msg': 'Account %s created' % testAccount },
-        'delete': { 'status': 'ok', 'status_msg': 'Account %s removed' % testAccount },
-        'update': { 'status': 'ok', 'status_msg': 'Account %s modified' % testAccount },
-    }
     r = HAgent('http://localhost:8000/v1/')
 
     def doTest(self, data, result):
         data['account'] = self.testAccount
         data['module'] = 'account'
         response, content = self.r.rest_connect(data)
-        self.assertEqual(json.dumps(self.resultsMap[result]),
-                         json.dumps(json.loads(content)))
+        self.assertEqual(json.dumps(result), json.dumps(json.loads(content)))
 
-    def test1_account_create(self):
+    def test1_create(self):
         ''' create account '''
         data = {'func': 'create', 'preset': 'tarif1'}
-        self.doTest(data, 'create')
+        result = {'status': 'ok', 'record': 'Account %s state=on preset=tarif1' % self.testAccount, 'status_msg': 'Account %s created' % self.testAccount}
+        self.doTest(data, result)
 
-    def test2_account_lock(self):
+    def test2_lock(self):
         ''' lock account '''
         data = {'func': 'lock'}
-        self.doTest(data, 'update')
+        result = {'status': 'ok', 'record': 'Account %s state=off preset=tarif1' % self.testAccount, 'status_msg': 'Account %s modified' % self.testAccount}
+        self.doTest(data, result)
 
-    def test3_account_unlock(self):
+    def test3_unlock(self):
         ''' unlock account '''
         data = {'func': 'unlock'}
-        self.doTest(data, 'update')
+        result = {'status': 'ok', 'record': 'Account %s state=on preset=tarif1' % self.testAccount, 'status_msg': 'Account %s modified' % self.testAccount}
+        self.doTest(data, result)
 
-    def test4_account_preset(self):
+    def test4_preset(self):
         ''' change preset for account '''
         data = {'func': 'preset', 'preset': 'tarif2'}
-        self.doTest(data, 'update')
+        result = {'status': 'ok', 'record': 'Account %s state=on preset=tarif2' % self.testAccount, 'status_msg': 'Account %s modified' % self.testAccount}
+        self.doTest(data, result)
 
-    def test5_account_delete(self):
+    def test5_delete(self):
         ''' delete account '''
         data = {'func': 'delete'}
-        self.doTest(data, 'delete')
+        result = {'status': 'ok', 'status_msg': 'Account %s removed' % self.testAccount}
+        self.doTest(data, result)
 
 if __name__ == '__main__':
     unittest.main()

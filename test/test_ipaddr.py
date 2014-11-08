@@ -54,45 +54,45 @@ class HAgentTest(unittest.TestCase):
         response, content = self.r.rest_connect(data)
         self.assertEqual(json.dumps(result), json.dumps(json.loads(content)))
 
-    def test1_ip_create1(self):
+    def test1_create1(self):
         ''' create ip '''
         data = {'func': 'create'}
         result = {'status': 'ok', 'record': 'Ip %s' % self.testIp, 'status_msg': 'Ip %s created' % self.testIp}
         self.doTest(data, result)
-        self.test5_ip_delete()
+        self.test5_delete()
 
-    def test1_ip_create2(self):
+    def test1_create2(self):
         ''' create ip and assign to account '''
         data = {'func': 'create', 'account': self.testAccount}
         result = {'status': 'ok', 'record': 'Ip %s account=%s' % (self.testIp, self.testAccount), 'status_msg': 'Ip %s created' % self.testIp}
         self.doTest(data, result)
-        self.test5_ip_delete()
+        self.test5_delete()
 
-    def test1_ip_create3(self):
+    def test1_create3(self):
         ''' create ip and assign to shared '''
         data = {'func': 'create', 'shared': 'on'}
         result = {'status': 'ok', 'record': 'Ip %s shared=on' % self.testIp, 'status_msg': 'Ip %s created' % self.testIp}
         self.doTest(data, result)
 
-    def test2_ip_assign1(self):
+    def test2_assign1(self):
         ''' assign ip to account '''
         data = {'func': 'assign', 'account': self.testAccount}
         result = {'status': 'ok', 'record': 'Ip %s account=%s' % (self.testIp, self.testAccount), 'status_msg': 'Ip %s modified' % self.testIp}
         self.doTest(data, result)
 
-    def test2_ip_assign2(self):
+    def test2_assign2(self):
         ''' assign ip to shared pool '''
         data = {'func': 'assign', 'shared': 'on'}
         result = {'status': 'ok', 'record': 'Ip %s shared=on' % self.testIp, 'status_msg': 'Ip %s modified' % self.testIp}
         self.doTest(data, result)
 
-    def test2_ip_assign3(self):
+    def test2_assign3(self):
         ''' assign ip to free pool '''
         data = {'func': 'assign', 'free': 'on'}
         result = {'status': 'ok', 'record': 'Ip %s' % self.testIp, 'status_msg': 'Ip %s modified' % self.testIp}
         self.doTest(data, result)
 
-    def test5_ip_delete(self):
+    def test5_delete(self):
         ''' delete ip '''
         data = {'func': 'delete'}
         result = {'status': 'ok', 'status_msg': 'Ip %s removed' % self.testIp}
