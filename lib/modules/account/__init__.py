@@ -14,14 +14,12 @@ __all__ = ['create',
            'delete',
            'lock',
            'unlock',
-           'preset',
-           ]
+           'preset']
 
 
 def create(args, config):
     '''Create account.'''
-    return Account(config,
-                   args.get('account')).create(args.get('preset'))
+    return Account(config, args.get('account')).create(args.get('preset'))
 
 
 def delete(args, config):

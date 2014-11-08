@@ -159,6 +159,7 @@ def main():
         # run func
         result = getattr(mod, func)(request.params, CONFIG)
         if result:
+            logging.debug(result)
             raise HTTPResponse200(json.dumps(convert_status(result)))
 
     if CONFIG['flup']:

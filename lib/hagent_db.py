@@ -41,14 +41,15 @@ def add_record(db, service_name, service_value, service_attr):
         logging.debug('waiting write access to %s for %s secs' % (db, 1))
         sleep(1)
 
+    # new record
+    record = '%s %s %s\n' % (service_name, service_value,
+        ' '.join('%s=%s' % (m, service_attr[m]) for m in service_attr.keys()))
+
     # write new data
     logging.debug('write %r', db)
     try:
         with open(db, 'a') as f:
-            f.write('%s %s %s\n' % (service_name,
-                    service_value,
-                    ' '.join('%s=%s' % (
-                        m, service_attr[m]) for m in service_attr.keys())))
+            f.write(record)
     except IOError, e:
         fl.unlock()
         output['status'] = 1
@@ -60,6 +61,7 @@ def add_record(db, service_name, service_value, service_attr):
 
     output['status'] = 0
     output['status_msg'] = '%s %s created' % (service_name, service_value)
+    output['record'] = record.strip()
     return output
 
 
@@ -155,10 +157,11 @@ def update_record(db, service_name, service_value,
                 # update cur_attrs
                 cur_attrs.update(service_attr)
                 # append to content_modified
-                content_modified.append('%s %s %s\n' % (
+                record = '%s %s %s\n' % (
                     service_name, service_value,
                     ' '.join('%s=%s' % (
-                        m, cur_attrs[m]) for m in cur_attrs.keys())))
+                        m, cur_attrs[m]) for m in cur_attrs.keys()))
+                content_modified.append(record)
 
     # wait lock file
     fl = FileLock('%s.lock' % db)
@@ -181,6 +184,7 @@ def update_record(db, service_name, service_value,
 
     output['status'] = 0
     output['status_msg'] = '%s %s modified' % (service_name, service_value)
+    output['record'] = record.strip()
     return output
 
 

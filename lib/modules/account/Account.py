@@ -65,6 +65,9 @@ class Account(object):
             if self.output['status']:
                 raise Output
 
+            #TODO 
+            # need to remove all resource assigned to account
+
             self.output.update(del_record(self.db, 'Account', self.account))
             raise Output
 
@@ -88,21 +91,8 @@ class Account(object):
                 self.output.update(check_attr)
                 raise Output
 
-            '''
-            if state == 'on':
-                account_resources = get_account_resources(self.db, self.account, locked=1)
-            elif state == 'off':
-                account_resources = get_account_resources(self.db, self.account)
-            else:
-                self.output['status'] = 1
-                self.output['status_msg'] = 'error set state for %s' % self.account
-                raise Output
-
-            if account_resources['status']:
-                self.output['status'] = 1
-                self.output['status_msg'] = account_resources['status_msg']
-                raise Output
-            '''
+            # TODO
+            # lock all resources assigned to user
 
             self.service_attr['state'] = state
             self.output.update(update_record(self.db, 'Account', self.account, self.service_attr))
@@ -130,6 +120,10 @@ class Account(object):
             if check_attr['status']:
                 self.output.update(check_attr)
                 raise Output
+
+
+            # TODO
+            # apply new limits to all resources assigned to user
 
             self.service_attr['preset'] = preset
             self.output.update(update_record(self.db, 'Account', self.account, self.service_attr))
