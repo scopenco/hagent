@@ -99,6 +99,7 @@ def del_record(db, service_name, service_value):
         logging.debug('waiting write access to %s for %s secs' % (db, 1))
         sleep(1)
 
+    logging.debug('write %r', db)
     try:
         with open(db, 'w') as f:
             f.writelines(content_modified)
@@ -165,6 +166,7 @@ def update_record(db, service_name, service_value,
         logging.debug('waiting write access to %s for %s secs' % (db, 1))
         sleep(1)
 
+    logging.debug('write %r', db)
     try:
         with open(db, 'w') as f:
             f.writelines(content_modified)
