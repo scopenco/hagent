@@ -8,7 +8,7 @@ from optparse import OptionParser
 from httplib2 import Http
 from urllib import urlencode
 from time import strftime, gmtime
-from sys import stdout, exit
+from sys import exit
 import logging
 
 # A good practice
