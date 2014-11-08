@@ -27,7 +27,6 @@ class Account(object):
             self.output['status'] = 1
             self.output['status_msg'] = 'argument <account> not specified'
 
-
     def create(self, preset):
         ''' create account '''
 
@@ -48,12 +47,12 @@ class Account(object):
 
             self.service_attr['state'] = 'on'
             self.service_attr['preset'] = preset
-            self.output.update(add_record(self.db, 'Account', self.account, self.service_attr))
+            self.output.update(add_record(self.db, 'Account',
+                                          self.account, self.service_attr))
             raise Output
 
         except Output:
             return self.output
-
 
     def delete(self,  restart=1):
         ''' delete account '''
@@ -72,7 +71,6 @@ class Account(object):
         except Output:
             return self.output
 
-
     def lock(self, state, restart=1):
         ''' lock account '''
 
@@ -83,7 +81,7 @@ class Account(object):
         try:
             if self.output['status']:
                 raise Output
-            
+
             # check if account exist for lock
             check_attr = get_record_attr(self.db, 'Account', self.account)
             if check_attr['status']:
@@ -113,7 +111,6 @@ class Account(object):
         except Output:
             return self.output
 
-
     def preset(self, preset,  restart=1):
         ''' change account preset '''
 
@@ -128,7 +125,7 @@ class Account(object):
 
             if self.output['status']:
                 raise Output
-            
+
             check_attr = get_record_attr(self.db, 'Account', self.account)
             if check_attr['status']:
                 self.output.update(check_attr)
