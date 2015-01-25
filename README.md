@@ -16,8 +16,4 @@ cd /usr/local/hagent/puppet
 puppet apply --modulepath modules/ manifests/default.pp
 ```
 
-Test:
-```bash
-$ GET http://localhost:8000/status
-{"status": 0}
-```
+
